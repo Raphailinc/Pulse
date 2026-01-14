@@ -1,17 +1,16 @@
 {% extends 'base.html' %}
-
+{% block title %}Редактировать комментарий · Pulse{% endblock %}
 {% block content %}
-<div class="content">
-    <h1>Edit Comment</h1>
-    <form method="POST" action="{{ url_for('app.edit_comment', comment_id=comment.id) }}">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            <label for="content">Content:</label>
-            {{ form.content }}
-        </div>
-        <div class="form-group">
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-    </form>
+<div class="card">
+  <h2 style="margin-top:0;">Редактировать комментарий</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div>
+      {{ form.content.label }}<br>
+      {{ form.content(rows=3) }}
+      {% for error in form.content.errors %}<span class="muted">{{ error }}</span>{% endfor %}
+    </div>
+    <button class="btn primary" type="submit">Сохранить</button>
+  </form>
 </div>
 {% endblock %}

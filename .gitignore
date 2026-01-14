@@ -14,6 +14,11 @@ venv/
 # Database
 database.db
 test.db
+static/uploads/posts/*
+static/uploads/profiles/*
+!static/uploads/posts/.gitkeep
+!static/uploads/profiles/.gitkeep
+!static/uploads/profiles/default.svg
 
 # Local development configuration
 instance/

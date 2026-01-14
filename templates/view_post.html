@@ -1,34 +1,61 @@
 {% extends 'base.html' %}
-
+{% block title %}{{ post.title }} · Pulse{% endblock %}
 {% block content %}
-<div class="content">
-    <h1>{{ post.title }}</h1>
-    <p>{{ post.content }}</p>
+<div class="grid-two">
+  <div class="card">
+    <div class="post-meta">
+      <img class="avatar" src="{{ post.user.profile_image_url() }}" alt="{{ post.user.username }}">
+      <div>
+        <strong>{{ post.user.username }}</strong>
+        <div class="muted">{{ post.date_posted.strftime('%d.%m.%Y %H:%M') }}</div>
+      </div>
+    </div>
+    <h2 style="margin-bottom:6px;">{{ post.title }}</h2>
     {% if post.image %}
-        <img src="{{ url_for('static', filename='post_pics/' + post.image) }}" alt="Post Image" style="width: 300px; height: auto;">
+      <img src="{{ url_for('static', filename=post.image) }}" alt="" style="width:100%; border-radius:12px; border:1px solid var(--border); margin:10px 0;">
     {% endif %}
-    <p>Автор: {{ post.user.username }}</p>
-    <h2>Комментарии</h2>
-    {% for comment in post.comments %}
-        <div class="comment-container {% if comment.user == current_user %}current-user{% endif %}">
-            <div class="comment">
-                <p class="comment-text">{{ comment.content }}</p>
-                <p class="comment-author">Автор: {{ comment.user.username }}</p>
-                {% if current_user == comment.user %}
-                    <a href="{{ url_for('app.edit_comment', comment_id=comment.id) }}" class="btn btn-primary">Редактировать</a>
-                    <form action="{{ url_for('app.delete_comment', comment_id=comment.id) }}" method="post" style="display: inline-block;">
-                        <button type="submit" class="btn btn-danger">Удалить</button>
-                    </form>
-                {% endif %}
-            </div>
+    <p class="muted">{{ post.content }}</p>
+    {% if current_user.is_authenticated and current_user == post.user %}
+      <div class="actions">
+        <a class="btn" href="{{ url_for('app.edit_post', post_id=post.id) }}">Редактировать</a>
+        <form method="post" action="{{ url_for('app.delete_post', post_id=post.id) }}" onsubmit="return confirm('Удалить пост?')">
+          <button class="btn danger" type="submit">Удалить</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Комментарии ({{ comments|length }})</h3>
+    {% for comment in comments %}
+      <div class="comment">
+        <div class="meta">
+          <strong>{{ comment.user.username }}</strong>
+          <span>{{ comment.date_created.strftime('%d.%m.%Y %H:%M') }}</span>
         </div>
+        <p style="margin:6px 0;">{{ comment.content }}</p>
+        {% if current_user.is_authenticated and current_user == comment.user %}
+          <div class="actions">
+            <a class="btn" href="{{ url_for('app.edit_comment', comment_id=comment.id) }}">Редактировать</a>
+            <form method="post" action="{{ url_for('app.delete_comment', comment_id=comment.id) }}">
+              <button class="btn danger" type="submit">Удалить</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <p class="muted">Пока нет комментариев.</p>
     {% endfor %}
-    <form action="{{ url_for('app.view_post', post_id=post.id) }}" method="post" class="comment-form">
-        {{ form.csrf_token }}
-        <div class="form-group">
-            <textarea name="content" placeholder="Введите комментарий"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Добавить комментарий</button>
-    </form>     
+
+    <form method="post" style="margin-top:12px;">
+      {{ form.hidden_tag() }}
+      <div>
+        {{ form.content.label }}<br>
+        {{ form.content(rows=3) }}
+        {% for error in form.content.errors %}<span class="muted">{{ error }}</span>{% endfor %}
+      </div>
+      <button class="btn primary" type="submit">Добавить комментарий</button>
+    </form>
+  </div>
 </div>
 {% endblock %}

@@ -1,10 +1,23 @@
-import secrets
 import os
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parent
 
 
 class Config:
-    SECRET_KEY = secrets.token_hex(16)
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///database.db'
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR/'social.db'}")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'profile_pics')
-    UPLOAD_POST_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'post_pics')
+
+    UPLOAD_ROOT = BASE_DIR / "static" / "uploads"
+    PROFILE_UPLOAD_FOLDER = UPLOAD_ROOT / "profiles"
+    POST_UPLOAD_FOLDER = UPLOAD_ROOT / "posts"
+
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB per upload
+
+
+class TestConfig(Config):
+    TESTING = True
+    WTF_CSRF_ENABLED = False
+    SQLALCHEMY_DATABASE_URI = "sqlite://"

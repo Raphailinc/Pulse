@@ -1,399 +1,303 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #0d1117;
+  --panel: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #22d3ee;
+  --accent-2: #f59e0b;
+  --danger: #f87171;
+  --radius: 14px;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
-    color: #495057;
-}
-
-nav {
-    background-color: #343a40;
-    padding: 15px 0;
-}
-
-ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-li {
-    display: inline;
-    margin-right: 20px;
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 10% 20%, rgba(34, 211, 238, 0.12), transparent 30%),
+    radial-gradient(circle at 80% 0%, rgba(245, 158, 11, 0.12), transparent 25%),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
 }
 
 a {
-    text-decoration: none;
-    color: #fff;
-    font-weight: bold;
-    font-size: 16px;
-    transition: color 0.3s ease;
+  color: inherit;
+  text-decoration: none;
 }
 
-a:hover {
-    color: #28a745;
+.shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px clamp(16px, 4vw, 32px) 64px;
 }
 
-h1 {
-    color: #333;
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px clamp(16px, 4vw, 32px);
+  position: sticky;
+  top: 0;
+  background: rgba(13, 17, 23, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+.brand {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #22d3ee, #8b5cf6);
+  color: #0b0f14;
+  font-weight: 800;
+}
+
+.nav-links {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pill {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: 0.2s ease;
+}
+
+.pill.primary {
+  background: linear-gradient(120deg, #22d3ee, #0ea5e9);
+  color: #0b0f14;
+  border: none;
+  font-weight: 600;
+}
+
+.pill:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+  align-items: center;
+  margin: 24px 0;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.hero-title {
+  font-size: clamp(28px, 4vw, 36px);
+  margin: 0 0 12px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.feed {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.post-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.post-title {
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(34, 211, 238, 0.12);
+  color: #7dd3fc;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.actions {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+button,
 .btn {
-    display: inline-block;
-    padding: 10px 15px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.15s ease;
 }
 
+button.primary,
+.btn.primary {
+  background: linear-gradient(120deg, #22d3ee, #0ea5e9);
+  color: #0b0f14;
+  border: none;
+  font-weight: 600;
+}
+
+button.danger,
+.btn.danger {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #fecdd3;
+}
+
+button:hover,
 .btn:hover {
-    background-color: #218838;
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
-/* Дополнительные стили для улучшения внешнего вида контента */
-.content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-/* Пример стилей для форм */
 form {
-    max-width: 400px;
-    margin: 0 auto;
+  display: grid;
+  gap: 12px;
 }
 
 label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 input,
 textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text);
 }
 
-.btn-primary {
-    background-color: #007bff;
+textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-
-/* Стили для ошибок */
 .flashes {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .flashes li {
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    background-color: #f8d7da;
-    color: #721c24;
-    border-radius: 5px;
-  }
-
-/* Стили для всех постов */
-.card {
-    margin-bottom: 20px;
+  list-style: none;
+  padding: 0;
 }
 
-.card-title {
-    font-size: 24px;
+.flashes li {
+  margin: 6px 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-/* Стили для формы комментария */
-.comment-form {
-    max-width: 400px;
-    margin: 0;
-}
-
-.comment-form label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.comment-form textarea {
-    width: calc(100% - 30px);
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    transition: width 0.3s ease;
-    height: 100px;
-    resize: vertical;
-    font-size: 16px;
-}
-
-.comment-form textarea:hover {
-    width: 100%;
-}
-
-.comment-form .btn {
-    display: inline-block;
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.comment-form .btn:hover {
-    background-color: #0056b3;
-}
-
-.comment-card {
-    background-color: #f8f9fa;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-}
-
-.comment-content {
-    margin-bottom: 10px;
-}
-
-.comment-author {
-    margin-top: 5px;
-    font-size: 14px;
-    font-style: italic;
-    color: #6c757d;
-}
-
-.comment-container {
-    margin-bottom: 20px;
-    overflow: hidden;
-}
+.flashes .danger { border-color: rgba(248, 113, 113, 0.4); color: #fecdd3; }
+.flashes .success { border-color: rgba(34, 197, 94, 0.4); color: #bbf7d0; }
 
 .comment {
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 5px;
-    display: inline-block;
-    overflow-wrap: break-word;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
 }
 
-.comment-text {
-    margin: 0;
+.comment .meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 13px;
 }
 
-.current-user {
-    text-align: right;
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
 }
 
-/* Примерные стили для страницы профиля */
-.profile-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
+.search-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
-/* Стили для заголовка профиля */
-.profile-header h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
+.search-bar input {
+  flex: 1;
 }
 
-/* Стили для информации о профиле */
-.profile-info {
-    margin-bottom: 30px;
+.hero-cta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.profile-posts, .profile-comments {
-    margin-bottom: 50px;
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 16px;
 }
 
-/* Стили для списка постов и комментариев */
-.post-list, .comment-list {
-    list-style: none;
-    padding: 0;
-}
-
-.post-item, .comment-item {
-    margin-bottom: 10px;
-}
-
-.post-item a {
-    color: #333;
-    text-decoration: none;
-}
-
-.comment-item {
-    font-style: italic;
-    color: #666;
-}
-
-.profile-picture-upload {
-    float: left;
-    width: 200px;
-    height: 200px;
-    margin-right: 20px;
-}
-
-.profile-picture-upload-container {
-    width: 200px;
-    height: 200px;
-    margin-right: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    left: 50px;
-    margin-left: 45px;
-}
-
-.profile-picture-upload-container input[type="file"] {
-    display: none;
-}
-
-.profile-picture-upload-container label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    background-color: #ccc;
-    text-align: center;
-    line-height: 100px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.profile-picture-upload-container img {
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 50%;
-}
-
-.profile-picture-upload-container form {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 10px;
-}
-
-/* Стили для изображения профиля */
-.profile-picture {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.profile-picture-container {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    margin-right: 20px;
-}
-
-.user-info {
-    flex: 1;
-}
-
-.upload-icon {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 10px;
-}
-
-.profile-info p {
-    color: #666;
-    font-size: 16px;
-}
-
-.upload-label {
-    background-color: #ccc;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-/* Остальные стили для кнопок */
-.btn-upload {
-    margin-top: 10px;
-    padding: 10px 15px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}   
-
-.upload-label:hover {
-    background-color: #bbb;
-}
-
-/* Стили для формы загрузки изображения */
-#upload-form {
-    position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Стили для кнопок "Применить" и "Отмена" */
-#apply-image-btn,
-#cancel-btn {
-    display: block;
-}
-
-.btn-upload:hover {
-    background-color: #218838;
-}
-
-.user-profile-picture-container {
-    width: 50px;
-    height: 50px;
-    overflow: hidden;
-    border-radius: 50%;
-    float: left;
-    margin-right: 10px;
-}
-
-.user-profile-picture-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+@media (max-width: 720px) {
+  nav { position: relative; }
+  .actions { width: 100%; }
+  .hero { grid-template-columns: 1fr; }
 }

@@ -1,100 +1,35 @@
-{% extends "base.html" %}
-
-{% block title %}Профиль{% endblock %}
-
+{% extends 'base.html' %}
+{% block title %}Профиль · Pulse{% endblock %}
 {% block content %}
-    <div class="profile-container">
-        <div class="profile-picture-container">
-            <img id="profile-picture" src="{{ url_for('static', filename='profile_pics/' + user.profile_image) }}" alt="Profile Picture" class="profile-picture">
-            <form id="upload-form" method="POST" enctype="multipart/form-data" style="display: none;">
-                <label for="profile-image-upload" class="upload-label">
-                    Изменить
-                </label>
-                <input type="file" name="profile_image" id="profile-image-upload" accept="image/*" style="display: none;" required>
-                <button type="button" id="cancel-btn" class="btn-upload">Отмена</button>
-                <button type="button" id="apply-image-btn" class="btn-upload">Применить</button>
-                <input type="hidden" id="previous-profile-image" value="{{ session.get('profile_image', url_for('static', filename='default_profile_picture.jpg')) }}">
-            </form>
-        </div>
-        <div class="user-info">
-            <div class="profile-header">
-                <h1>{{ user.username }}</h1>
-            </div>
-            <div class="profile-info">
-                <p>Это ваш профиль. Здесь вы можете просмотреть свои последние действия.</p>
-            </div>
-            <div class="profile-posts">
-                <h2>Последние посты:</h2>
-                <ul class="post-list">
-                    {% for post in posts %}
-                        <li class="post-item">
-                            <a href="{{ url_for('app.view_post', post_id=post.id) }}">{{ post.title }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>            
-            <div class="profile-comments">
-                <h2>Последние комментарии:</h2>
-                <ul class="comment-list">
-                    {% for comment in user.comments %}
-                        <li class="comment-item">{{ comment.content }}</li>
-                        <hr>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+<div class="grid-two">
+  <div class="card">
+    <div class="post-meta">
+      <img class="avatar" src="{{ user.profile_image_url() }}" alt="{{ user.username }}" style="width:72px; height:72px; border-radius:16px;">
+      <div>
+        <h2 style="margin:0;">{{ user.username }}</h2>
+        <p class="muted">Ваши публикации и комментарии</p>
+      </div>
     </div>
+    <form method="post" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div>
+        {{ form.profile_picture.label }}<br>
+        {{ form.profile_picture() }}
+        {% for error in form.profile_picture.errors %}<span class="muted">{{ error }}</span>{% endfor %}
+      </div>
+      <button class="btn" type="submit">Обновить фото</button>
+    </form>
+  </div>
 
-    <script>
-        function previewImage(event) {
-            var input = event.target;
-            var reader = new FileReader();
-            reader.onload = function(){
-                var img = document.getElementById('profile-picture');
-                img.src = reader.result;
-            };
-            reader.readAsDataURL(input.files[0]);
-            document.getElementById('apply-image-btn').style.display = 'block';
-            document.getElementById('cancel-btn').style.display = 'block';
-            document.getElementById('upload-form').style.display = 'flex';
-        }
-    
-        document.getElementById('profile-image-upload').addEventListener('change', previewImage);
-    
-        document.getElementById('profile-picture').addEventListener('click', function() {
-            document.getElementById('profile-image-upload').click();
-        });
-    
-        document.getElementById('cancel-btn').addEventListener('click', function() {
-            var previousImageUrl = document.getElementById('previous-profile-image').value;
-            document.getElementById('profile-picture').src = previousImageUrl;
-            document.getElementById('apply-image-btn').style.display = 'none';
-            document.getElementById('cancel-btn').style.display = 'none';
-            document.getElementById('upload-form').style.display = 'none';
-        });
-    
-        document.getElementById('apply-image-btn').addEventListener('click', function() {
-            var fileInput = document.getElementById('profile-image-upload');
-            var file = fileInput.files[0];
-    
-            var formData = new FormData();
-            formData.append('profile_image', file);
-    
-            fetch('/update_profile_image', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('profile-picture').src = data.profile_image_url;
-                sessionStorage.setItem('profile_image_url', data.profile_image_url);
-            })
-            .catch(error => console.error('Ошибка загрузки изображения:', error));
-        });
-    
-        document.addEventListener('DOMContentLoaded', function() {
-            var profileImageURL = sessionStorage.getItem('profile_image_url');
-            document.getElementById('profile-picture').src = profileImageURL || '{{ url_for("static", filename="default_profile_picture.jpg") }}';
-        });
-    </script>    
+  <div class="card">
+    <h3 style="margin-top:0;">Ваши посты</h3>
+    <ul style="padding-left:16px;">
+      {% for post in posts %}
+        <li><a href="{{ url_for('app.view_post', post_id=post.id) }}">{{ post.title }}</a></li>
+      {% else %}
+        <p class="muted">Пока нет постов.</p>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endblock %}

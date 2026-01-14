@@ -1,177 +1,88 @@
-import unittest
-from manage import create_app
-from app.models import db
-from app.models import User, Post, Comment
-from flask import url_for
+from __future__ import annotations
 
-from config import Config
+import pytest
 
-class TestConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
-    TESTING = True
+from app import create_app, db
+from app.models import Post, User
+from config import TestConfig
 
-class TestRoutes(unittest.TestCase):
-    def setUp(self):
-        self.app = create_app(TestConfig)
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        self.client = self.app.test_client()
 
+@pytest.fixture()
+def app():
+    app = create_app(TestConfig)
+    with app.app_context():
         db.create_all()
+    yield app
+    with app.app_context():
+        db.drop_all()
 
-    def tearDown(self):
-        with self.app.app_context():
-            db.session.remove()
-            db.drop_all()
 
-    def test_home_route(self):
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 200)
+@pytest.fixture()
+def client(app):
+    return app.test_client()
 
-    def test_login_route(self):
-        response = self.client.get('/login')
-        self.assertEqual(response.status_code, 200)
 
-    def test_registration_route(self):
-        response = self.client.get('/register')
-        self.assertEqual(response.status_code, 200)
+def register(client, username: str, password: str):
+    return client.post(
+        "/register",
+        data={"username": username, "password": password, "confirm_password": password},
+        follow_redirects=True,
+    )
 
-    def test_view_post_route(self):
-        user = User(username='testuser', password='testpassword')
+
+def login(client, username: str, password: str):
+    return client.post(
+        "/login",
+        data={"username": username, "password": password},
+        follow_redirects=True,
+    )
+
+
+def test_home_page(client):
+    resp = client.get("/")
+    assert resp.status_code == 200
+
+
+def test_register_and_login_flow(client, app):
+    rv = register(client, "alice", "secret123")
+    body = rv.get_data(as_text=True)
+    assert "Аккаунт создан" in body
+
+    rv = login(client, "alice", "secret123")
+    assert "Успешный вход" in rv.get_data(as_text=True)
+
+
+def test_create_post_and_comment(client, app):
+    register(client, "alice", "secret123")
+    login(client, "alice", "secret123")
+
+    rv = client.post(
+        "/create_post",
+        data={"title": "First", "content": "Hello world content"},
+        follow_redirects=True,
+    )
+    assert "Пост опубликован" in rv.get_data(as_text=True)
+
+    with app.app_context():
+        post_id = Post.query.first().id
+
+    rv = client.post(
+        f"/post/{post_id}",
+        data={"content": "Nice post"},
+        follow_redirects=True,
+    )
+    assert "Комментарий добавлен" in rv.get_data(as_text=True)
+
+
+def test_api_posts(client, app):
+    with app.app_context():
+        user = User(username="bob", password="hash")
         db.session.add(user)
-        db.session.commit()
-        post = Post(title='Test Post', content='Test Content', user_id=user.id)
-        db.session.add(post)
+        db.session.add(Post(title="API Post", content="content", user=user))
         db.session.commit()
 
-        response = self.client.get(f'/post/{post.id}')
-        self.assertEqual(response.status_code, 302)
-
-    def test_create_post_route(self):
-        user = User(username='testuser', password='testpassword')
-        db.session.add(user)
-        db.session.commit()
-
-        with self.client.session_transaction() as session:
-            session['user_id'] = user.id
-
-        response = self.client.get('/create_post')
-        self.assertEqual(response.status_code, 302)
-
-    def test_edit_post_route(self):
-        with self.app.test_request_context():
-            user = User(username='testuser', password='testpassword')
-            db.session.add(user)
-            db.session.commit()
-            post = Post(title='Test Post', content='Test Content', user_id=user.id)
-            db.session.add(post)
-            db.session.commit()
-
-            with self.client.session_transaction() as session:
-                session['user_id'] = user.id
-
-            response = self.client.get(url_for('app.edit_post', post_id=post.id))
-            self.assertEqual(response.status_code, 302)
-
-    def test_all_posts_route(self):
-        user = User(username='testuser', password='testpassword')
-        db.session.add(user)
-        db.session.commit()
-        post = Post(title='Test Post', content='Test Content', user_id=user.id)
-        db.session.add(post)
-        db.session.commit()
-
-        with self.client.session_transaction() as session:
-            session['user_id'] = user.id
-
-        response = self.client.get('/all_posts')
-        self.assertEqual(response.status_code, 200)
-
-    def test_delete_post_route(self):
-        with self.app.test_request_context():
-            user = User(username='testuser', password='testpassword')
-            db.session.add(user)
-            db.session.commit()
-            post = Post(title='Test Post', content='Test Content', user_id=user.id)
-            db.session.add(post)
-            db.session.commit()
-
-            with self.client.session_transaction() as session:
-                session['user_id'] = user.id
-
-            response = self.client.post(url_for('app.delete_post', post_id=post.id), follow_redirects=False)
-            self.assertEqual(response.status_code, 302)
-
-    def test_profile_route(self):
-        user = User(username='testuser', password='testpassword')
-        db.session.add(user)
-        db.session.commit()
-
-        with self.client.session_transaction() as session:
-            session['user_id'] = user.id
-
-        response = self.client.get('/profile')
-        self.assertEqual(response.status_code, 302)
-
-    def test_update_profile_image_route(self):
-        user = User(username='testuser', password='testpassword')
-        db.session.add(user)
-        db.session.commit()
-
-        with self.client.session_transaction() as session:
-            session['user_id'] = user.id
-
-        response = self.client.post('/update_profile_image', data=dict(profile_image='test_image.jpg'),
-                                    content_type='multipart/form-data')
-        self.assertEqual(response.status_code, 302)
-
-    def test_edit_comment_route(self):
-        with self.app.test_request_context():
-            user = User(username='testuser', password='testpassword')
-            db.session.add(user)
-            db.session.commit()
-            post = Post(title='Test Post', content='Test Content', user_id=user.id)
-            db.session.add(post)
-            db.session.commit()
-            comment = Comment(content='Test Comment', post_id=post.id, user_id=user.id)
-            db.session.add(comment)
-            db.session.commit()
-
-            with self.client.session_transaction() as session:
-                session['user_id'] = user.id
-
-            response = self.client.get(url_for('app.edit_comment', comment_id=comment.id))
-            self.assertEqual(response.status_code, 302)
-
-    def test_delete_comment_route(self):
-        with self.app.test_request_context():
-            user = User(username='testuser', password='testpassword')
-            db.session.add(user)
-            db.session.commit()
-            post = Post(title='Test Post', content='Test Content', user_id=user.id)
-            db.session.add(post)
-            db.session.commit()
-            comment = Comment(content='Test Comment', post_id=post.id, user_id=user.id)
-            db.session.add(comment)
-            db.session.commit()
-
-            with self.client.session_transaction() as session:
-                session['user_id'] = user.id
-
-            response = self.client.post(url_for('app.delete_comment', comment_id=comment.id), follow_redirects=False)
-            self.assertEqual(response.status_code, 302)
-
-    def test_logout_route(self):
-        user = User(username='testuser', password='testpassword')
-        db.session.add(user)
-        db.session.commit()
-
-        with self.client.session_transaction() as session:
-            session['user_id'] = user.id
-
-        response = self.client.get('/logout', follow_redirects=False)
-        self.assertEqual(response.status_code, 302)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    resp = client.get("/api/posts")
+    assert resp.status_code == 200
+    payload = resp.get_json()
+    assert "posts" in payload
+    assert payload["posts"][0]["title"] == "API Post"

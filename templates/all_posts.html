@@ -1,56 +1,57 @@
 {% extends 'base.html' %}
-
+{% block title %}Лента · Pulse{% endblock %}
 {% block content %}
-<div class="container">
-    <h1>Все посты</h1>
-    <form action="{{ url_for('app.all_posts') }}" method="GET" class="form-inline mb-3">
-        <input type="text" name="search" class="form-control mr-sm-2" placeholder="Поиск">
-        <button type="submit" class="btn btn-primary">Найти</button>
+<div class="card">
+  <div class="search-bar">
+    <form method="get" action="{{ url_for('app.all_posts') }}" style="flex:1; display:flex; gap:10px;">
+      <input type="search" name="search" placeholder="Поиск по заголовку или содержанию" value="{{ search }}">
+      <button class="btn">Искать</button>
     </form>
-    {% for post_with_profile in all_posts_with_profile.items %}
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ post_with_profile.title }}</h5>
-                <p class="card-text">{{ post_with_profile.content }}</p>
-                {% if post_with_profile.image %}
-                    <img src="{{ url_for('static', filename='post_pics/' + post_with_profile.image) }}" alt="Post Image" class="post-image" style="width: 300px; height: auto;">
-                {% endif %}
-                <p class="card-text">Автор: {{ post_with_profile.user.username }}</p>
-                <div class="user-profile-picture-container">
-                    {% if post_with_profile.user.profile_image %}
-                        <img src="{{ url_for('static', filename='profile_pics/' + post_with_profile.user.profile_image) }}" alt="User Profile Picture" class="user-profile-picture">
-                    {% else %}
-                        <img src="{{ url_for('static', filename='default_profile_picture.jpg') }}" alt="Default Profile Picture" class="user-profile-picture">
-                    {% endif %}
-                </div>
-                {% if current_user.is_authenticated and post_with_profile.user.id == current_user.id %}
-                    <a href="{{ url_for('app.edit_post', post_id=post_with_profile.id) }}" class="btn btn-primary">Редактировать</a>
-                    <form action="{{ url_for('app.delete_post', post_id=post_with_profile.id) }}" method="post" style="display: inline-block;">
-                        <button type="submit" class="btn btn-danger">Удалить</button>
-                    </form>
-                {% endif %}
-                <a href="{{ url_for('app.view_post', post_id=post_with_profile.id) }}" class="btn btn-primary">Комментарии</a>
-            </div>
-        </div>
-    {% endfor %}
-    <div class="pagination">
-        {% if all_posts_with_profile.has_prev %}
-            <a href="{{ url_for('app.all_posts', page=all_posts_with_profile.prev_num) }}">Previous</a>
-        {% endif %}
-        {% for page_num in all_posts_with_profile.iter_pages() %}
-            {% if page_num %}
-                {% if page_num != all_posts_with_profile.page %}
-                    <a href="{{ url_for('app.all_posts', page=page_num) }}">{{ page_num }}</a>
-                {% else %}
-                    <span>{{ page_num }}</span>
-                {% endif %}
-            {% else %}
-                ...
-            {% endif %}
-        {% endfor %}
-        {% if all_posts_with_profile.has_next %}
-            <a href="{{ url_for('app.all_posts', page=all_posts_with_profile.next_num) }}">Next</a>
-        {% endif %}
-    </div>
+    {% if current_user.is_authenticated %}
+      <a class="btn primary" href="{{ url_for('app.create_post') }}">Создать пост</a>
+    {% endif %}
+  </div>
 </div>
+
+<div class="feed" style="margin-top:14px;">
+  {% for post in posts.items %}
+    <div class="post-card card">
+      {% if post.image %}
+        <img src="{{ url_for('static', filename=post.image) }}" alt="" style="width:100%; border-radius:10px; border:1px solid var(--border); max-height:180px; object-fit:cover;">
+      {% endif %}
+      <div class="post-meta">
+        <img class="avatar" src="{{ post.user.profile_image_url() }}" alt="{{ post.user.username }}">
+        <div>
+          <strong>{{ post.user.username }}</strong>
+          <div class="muted">{{ post.date_posted.strftime('%d.%m.%Y %H:%M') }}</div>
+        </div>
+      </div>
+      <p class="post-title">{{ post.title }}</p>
+      <p class="muted">{{ post.content[:220] }}{% if post.content|length > 220 %}…{% endif %}</p>
+      <div class="actions">
+        <a class="btn" href="{{ url_for('app.view_post', post_id=post.id) }}">Открыть</a>
+        {% if current_user.is_authenticated and current_user == post.user %}
+          <a class="btn" href="{{ url_for('app.edit_post', post_id=post.id) }}">Редактировать</a>
+          <form method="post" action="{{ url_for('app.delete_post', post_id=post.id) }}" onsubmit="return confirm('Удалить пост?')" style="display:inline;">
+            <button class="btn danger" type="submit">Удалить</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <p class="empty">Посты не найдены.</p>
+  {% endfor %}
+</div>
+
+{% if posts.pages > 1 %}
+  <div style="margin-top:16px; display:flex; gap:10px; align-items:center;">
+    {% if posts.has_prev %}
+      <a class="btn" href="{{ url_for('app.all_posts', page=posts.prev_num, search=search) }}">Назад</a>
+    {% endif %}
+    <span class="muted">Стр. {{ posts.page }} из {{ posts.pages }}</span>
+    {% if posts.has_next %}
+      <a class="btn" href="{{ url_for('app.all_posts', page=posts.next_num, search=search) }}">Вперёд</a>
+    {% endif %}
+  </div>
+{% endif %}
 {% endblock %}

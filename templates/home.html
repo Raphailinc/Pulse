@@ -1,25 +1,38 @@
 {% extends 'base.html' %}
-
+{% block title %}Pulse · Сообщество{% endblock %}
 {% block content %}
-  <div class="container">
-    {% if current_user.is_authenticated %}
-      <div class="jumbotron">
-        <h1 class="display-4">Добро пожаловать, {{ current_user.username }}!</h1>
-        <p class="lead">Это ваш блог. Начните новое обсуждение или присоединитесь к существующим.</p>
-        <hr class="my-4">
-        <p>Делитесь своим опытом и идеями.</p>
-        <a class="btn btn-primary btn-lg" href="{{ url_for('app.create_post') }}" role="button">Создать пост</a>
-        <a class="btn btn-primary btn-lg" href="{{ url_for('app.all_posts') }}" role="button">Просмотреть все посты</a>
-      </div>
-    {% else %}
-      <div class="jumbotron">
-        <h1 class="display-4">Добро пожаловать в блог!</h1>
-        <p class="lead">Здесь вы можете делиться своими мыслями и идеями.</p>
-        <hr class="my-4">
-        <p>Присоединяйтесь к нашему сообществу и начинайте обсуждение.</p>
-        <a class="btn btn-primary btn-lg" href="{{ url_for('app.login') }}" role="button">Войти</a>
-        <a class="btn btn-primary btn-lg" href="{{ url_for('app.register') }}" role="button">Зарегистрироваться</a>
-      </div>
-    {% endif %}
+<section class="hero">
+  <div class="card">
+    <p class="badge">Тёплое коммьюнити</p>
+    <h1 class="hero-title">Создавайте посты, делитесь опытом и держите связь.</h1>
+    <p class="muted">Pulse — лёгкая социальная мини-платформа на Flask с безопасными загрузками, удобной лентой и быстрым поиском.</p>
+    <div class="hero-cta">
+      <a class="pill primary" href="{{ url_for('app.create_post') }}">Написать пост</a>
+      <a class="pill" href="{{ url_for('app.all_posts') }}">Лента</a>
+    </div>
   </div>
+  <div class="card">
+    <h3 style="margin-top: 0;">Последние посты</h3>
+    <div class="feed">
+      {% for post in posts %}
+        <div class="post-card card">
+          <div class="post-meta">
+            <img class="avatar" src="{{ post.user.profile_image_url() }}" alt="{{ post.user.username }}">
+            <div>
+              <strong>{{ post.user.username }}</strong><br>
+              <span class="muted">{{ post.date_posted.strftime('%d.%m.%Y %H:%M') }}</span>
+            </div>
+          </div>
+          <p class="post-title">{{ post.title }}</p>
+          <p class="muted">{{ post.content[:120] }}{% if post.content|length > 120 %}…{% endif %}</p>
+          <div class="actions">
+            <a class="btn" href="{{ url_for('app.view_post', post_id=post.id) }}">Открыть</a>
+          </div>
+        </div>
+      {% else %}
+        <p class="muted">Пока нет постов — начните первым!</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
 {% endblock %}
