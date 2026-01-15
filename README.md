@@ -4,6 +4,9 @@
 
 Мини-соцсеть на Flask с чистым API, безопасными загрузками и современной витриной.
 
+## Скриншот
+![Pulse UI](docs/pulse.svg)
+
 ## Что нового
 - App factory + конфиги через переменные окружения (`DATABASE_URL`, `SECRET_KEY`), автоматическое создание директорий загрузок.
 - Безопасное сохранение изображений (uuid, проверка расширений, лимит 5 МБ) для постов и профилей.
@@ -33,13 +36,24 @@ export DATABASE_URL="postgresql://user:pass@localhost:5432/pulse"
 export SECRET_KEY="replace-me"
 ```
 
-## Структура
-- `app/__init__.py` — фабрика приложения, логин-менеджер, регистрация blueprint.
-- `app/models.py` — пользователи, посты, комментарии с каскадным удалением.
-- `app/routes.py` — все маршруты, поиск, пагинация, API, загрузка медиа.
-- `static/styles.css` — новый UI; `static/uploads/...` — хранилище изображений.
-- `templates/` — обновлённые страницы (лента, пост, профиль, auth).
-- `tests/` — pytest сценарии регистрация/логин/пост/комментарий.
+## API (пример)
+```bash
+# JSON лента
+GET /api/posts  -> {"posts": [{"id":1,"title":"First","author":"alice","image":null,...}]}
+
+# Создать пост (формы)
+POST /create_post title=Hello content="Hi" [image]
+
+# Добавить комментарий
+POST /post/<id>  content="Nice!"
+```
+
+## Архитектура
+- `app/__init__.py` — фабрика, login manager, ensure uploads.
+- `app/models.py` — Users/Posts/Comments, отношения и валидация.
+- `app/routes.py` — HTML + JSON API, поиск/пагинация, загрузка медиа.
+- `static/`, `templates/` — UI; `static/uploads` — медиа (монтируется как volume в Docker).
+- `tests/` — pytest: регистрация/логин/посты/комменты.
 
 ## Линт и тесты
 ```bash
