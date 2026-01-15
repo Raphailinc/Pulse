@@ -157,11 +157,7 @@ def edit_post(post_id: int):
 @bp.route("/post/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def view_post(post_id: int):
-    post = (
-        Post.query.options(joinedload(Post.user), joinedload(Post.comments).joinedload(Comment.user))
-        .filter_by(id=post_id)
-        .first_or_404()
-    )
+    post = Post.query.options(joinedload(Post.user)).filter_by(id=post_id).first_or_404()
     form = CommentForm()
     if form.validate_on_submit():
         comment = Comment(content=form.content.data.strip(), post=post, user=current_user)
@@ -169,7 +165,12 @@ def view_post(post_id: int):
         db.session.commit()
         flash("Комментарий добавлен!", "success")
         return redirect(url_for("app.view_post", post_id=post_id))
-    comments = post.comments.order_by(Comment.date_created.desc()).all()
+    comments = (
+        Comment.query.options(joinedload(Comment.user))
+        .filter_by(post_id=post.id)
+        .order_by(Comment.date_created.desc())
+        .all()
+    )
     return render_template("view_post.html", post=post, comments=comments, form=form)
 
 

@@ -1,5 +1,7 @@
 # Pulse
 
+![CI](https://github.com/Raphailinc/Pulse/actions/workflows/ci.yml/badge.svg)
+
 Мини-соцсеть на Flask с чистым API, безопасными загрузками и современной витриной.
 
 ## Что нового
@@ -9,16 +11,23 @@
 - JSON эндпоинт `/api/posts` и улучшенная пагинация/поиск по ленте.
 - Тесты на pytest с SQLite in-memory конфигом.
 
+## Quickstart (Docker)
+```bash
+cp .env.example .env          # DATABASE_URL/SECRET_KEY можно оставить как есть
+docker compose up --build
+# API: http://localhost:8000/api/posts
+```
+
 ## Запуск
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 flask --app manage.py init-db   # создать таблицы
 flask --app manage.py run
 ```
 
-По умолчанию база — `sqlite:///social.db`. Для другой БД задайте `DATABASE_URL`, например:
+В Docker Compose используется PostgreSQL (см. `.env.example`). Для локального запуска без Docker можно оставить SQLite: `DATABASE_URL=sqlite:///social.db`. Пример для внешней БД:
 ```bash
 export DATABASE_URL="postgresql://user:pass@localhost:5432/pulse"
 export SECRET_KEY="replace-me"
@@ -32,9 +41,12 @@ export SECRET_KEY="replace-me"
 - `templates/` — обновлённые страницы (лента, пост, профиль, auth).
 - `tests/` — pytest сценарии регистрация/логин/пост/комментарий.
 
-## Быстрая проверка
-- Линт синтаксиса: `python -m py_compile $(find app -name '*.py')`
-- Тесты: `pytest`
+## Линт и тесты
+```bash
+ruff check .
+black --check .
+pytest
+```
 
 ## Возможности
 - Регистрация/авторизация (пароли PBKDF2).

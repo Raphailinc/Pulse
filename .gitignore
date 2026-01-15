@@ -9,6 +9,7 @@ __pycache__/
 # Environment
 .env
 venv/
+.venv/
 .env.*
 
 # Database
@@ -22,3 +23,7 @@ static/uploads/profiles/*
 
 # Local development configuration
 instance/
+
+# Tooling caches
+.ruff_cache/
+.pytest_cache/

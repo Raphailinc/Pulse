@@ -37,7 +37,7 @@ class Post(db.Model):
     image = db.Column(db.String(255))
 
     user = db.relationship("User", back_populates="posts")
-    comments = db.relationship("Comment", back_populates="post", cascade="all, delete-orphan", lazy="dynamic")
+    comments = db.relationship("Comment", back_populates="post", cascade="all, delete-orphan")
 
     def image_url(self) -> Optional[str]:
         if self.image:
