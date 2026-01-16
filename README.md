@@ -18,7 +18,7 @@
 ```bash
 cp .env.example .env          # DATABASE_URL/SECRET_KEY можно оставить как есть
 docker compose up --build
-# API: http://localhost:8000/api/posts
+# API: http://localhost:8080/api/posts (HOST_PORT можно менять)
 ```
 
 ## Запуск
@@ -34,6 +34,7 @@ flask --app manage.py run
 ```bash
 export DATABASE_URL="postgresql://user:pass@localhost:5432/pulse"
 export SECRET_KEY="replace-me"
+# HOST_PORT=8080  # можно поменять при использовании docker compose
 ```
 
 ## API (пример)

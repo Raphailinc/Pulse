@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from flask import url_for
@@ -8,6 +8,11 @@ from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+DEFAULT_PROFILE_IMAGE = "uploads/profiles/default.svg"
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class User(db.Model, UserMixin):
@@ -22,7 +27,7 @@ class User(db.Model, UserMixin):
     def profile_image_url(self) -> str:
         if self.profile_image:
             return url_for("static", filename=self.profile_image, _external=False)
-        return url_for("static", filename="uploads/profiles/default.svg", _external=False)
+        return url_for("static", filename=DEFAULT_PROFILE_IMAGE, _external=False)
 
     def __repr__(self) -> str:
         return f"<User {self.username}>"
@@ -32,7 +37,7 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_posted = db.Column(db.DateTime, nullable=False, default=_utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     image = db.Column(db.String(255))
 
@@ -51,7 +56,7 @@ class Post(db.Model):
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, nullable=False, default=_utcnow)
     post_id = db.Column(db.Integer, db.ForeignKey("post.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 

@@ -1,19 +1,35 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      network: host
     env_file:
       - .env
     environment:
       - DATABASE_URL=${DATABASE_URL:-postgresql://pulse_user:pulse_password@db:5432/pulse_db}
-      - SECRET_KEY=${SECRET_KEY:-dev-secret}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
       - PORT=${PORT:-8000}
-    ports:
-      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - uploads:/app/static/uploads
+    network_mode: bridge
+    links:
+      - db
+
+  web:
+    image: nginx:alpine
+    depends_on:
+      app:
+        condition: service_started
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "${HOST_PORT:-8080}:80"
+    network_mode: bridge
+    links:
+      - app
 
   db:
     image: postgres:15-alpine
@@ -28,6 +44,7 @@ services:
       retries: 5
     volumes:
       - db_data:/var/lib/postgresql/data
+    network_mode: bridge
 
 volumes:
   db_data:
