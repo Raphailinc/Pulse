@@ -1,6 +1,7 @@
 # Pulse
 
 ![CI](https://github.com/Raphailinc/Pulse/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://raw.githubusercontent.com/Raphailinc/Pulse/main/badges/coverage.svg)
 
 Мини-соцсеть на Flask с чистым API, безопасными загрузками и современной витриной.
 
