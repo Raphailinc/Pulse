@@ -15,6 +15,7 @@ venv/
 # Database
 database.db
 test.db
+social.db
 static/uploads/posts/*
 static/uploads/profiles/*
 !static/uploads/posts/.gitkeep

@@ -1,25 +1,7 @@
 from __future__ import annotations
 
-import pytest
-
-from app import create_app, db
+from app import db
 from app.models import Post, User
-from config import TestConfig
-
-
-@pytest.fixture()
-def app():
-    app = create_app(TestConfig)
-    with app.app_context():
-        db.create_all()
-    yield app
-    with app.app_context():
-        db.drop_all()
-
-
-@pytest.fixture()
-def client(app):
-    return app.test_client()
 
 
 def register(client, username: str, password: str):
@@ -84,5 +66,24 @@ def test_api_posts(client, app):
     resp = client.get("/api/posts")
     assert resp.status_code == 200
     payload = resp.get_json()
-    assert "posts" in payload
-    assert payload["posts"][0]["title"] == "API Post"
+    assert "items" in payload
+    assert payload["items"][0]["title"] == "API Post"
+    assert payload["page"] == 1
+    assert payload["total"] == 1
+
+
+def test_api_posts_limit_cap(client, app):
+    with app.app_context():
+        user = User(username="bulk", password="hash")
+        db.session.add(user)
+        for i in range(120):
+            db.session.add(Post(title=f"Post {i}", content="content body", user=user))
+        db.session.commit()
+
+    resp = client.get("/api/posts?limit=150&page=2")
+    assert resp.status_code == 200
+    payload = resp.get_json()
+    assert payload["limit"] == 100
+    assert payload["page"] == 2
+    assert payload["total"] == 120
+    assert len(payload["items"]) == 20

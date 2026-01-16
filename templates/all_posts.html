@@ -33,6 +33,7 @@
         {% if current_user.is_authenticated and current_user == post.user %}
           <a class="btn" href="{{ url_for('app.edit_post', post_id=post.id) }}">Редактировать</a>
           <form method="post" action="{{ url_for('app.delete_post', post_id=post.id) }}" onsubmit="return confirm('Удалить пост?')" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn danger" type="submit">Удалить</button>
           </form>
         {% endif %}

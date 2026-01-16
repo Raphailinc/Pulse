@@ -19,6 +19,7 @@
       <div class="actions">
         <a class="btn" href="{{ url_for('app.edit_post', post_id=post.id) }}">Редактировать</a>
         <form method="post" action="{{ url_for('app.delete_post', post_id=post.id) }}" onsubmit="return confirm('Удалить пост?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button class="btn danger" type="submit">Удалить</button>
         </form>
       </div>
@@ -38,6 +39,7 @@
           <div class="actions">
             <a class="btn" href="{{ url_for('app.edit_comment', comment_id=comment.id) }}">Редактировать</a>
             <form method="post" action="{{ url_for('app.delete_comment', comment_id=comment.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn danger" type="submit">Удалить</button>
             </form>
           </div>
@@ -47,15 +49,19 @@
       <p class="muted">Пока нет комментариев.</p>
     {% endfor %}
 
-    <form method="post" style="margin-top:12px;">
-      {{ form.hidden_tag() }}
-      <div>
-        {{ form.content.label }}<br>
-        {{ form.content(rows=3) }}
-        {% for error in form.content.errors %}<span class="muted">{{ error }}</span>{% endfor %}
-      </div>
-      <button class="btn primary" type="submit">Добавить комментарий</button>
-    </form>
+    {% if current_user.is_authenticated %}
+      <form method="post" style="margin-top:12px;">
+        {{ form.hidden_tag() }}
+        <div>
+          {{ form.content.label }}<br>
+          {{ form.content(rows=3) }}
+          {% for error in form.content.errors %}<span class="muted">{{ error }}</span>{% endfor %}
+        </div>
+        <button class="btn primary" type="submit">Добавить комментарий</button>
+      </form>
+    {% else %}
+      <p class="muted" style="margin-top:12px;">Войдите, чтобы оставить комментарий.</p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
