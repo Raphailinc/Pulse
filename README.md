@@ -10,7 +10,7 @@ A small social application used to explore Flask application structure, user-own
 
 - Register and sign in with hashed passwords and CSRF-protected forms.
 - Create posts, comments and profiles, with ownership checks for edits.
-- Store images under generated names with extension and size checks.
+- Store images under generated names after content, format, upload-size and decoded-pixel checks.
 - Search and paginate the feed; query `/api/posts` as JSON.
 
 ## Run locally
@@ -36,3 +36,5 @@ black --check .
 ## Scope and implementation notes
 
 Local UI: `http://127.0.0.1:5000`. Use `python -c "import secrets; print(secrets.token_hex(32))"` to generate a secret for your local `.env`. SQLite is the default; Docker Compose uses PostgreSQL. This is a portfolio app; upload validation does not replace a production malware-scanning service.
+
+Image validation is shared by forms and persistence. `MAX_IMAGE_PIXELS` defaults to 16 million; oversized or invalid images are rejected before saving. Python 3.11+ is required.

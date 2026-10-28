@@ -77,6 +77,45 @@ def test_valid_image_saved_and_normalized(client, app):
         assert saved_image.format == "PNG"
 
 
+def test_compressed_image_must_fit_pixel_budget(client, app):
+    register_and_login(client)
+    app.config["MAX_IMAGE_PIXELS"] = 100
+    response = client.post(
+        "/create_post",
+        data={
+            "title": "Too many pixels",
+            "content": "content goes here",
+            "image": (make_image_bytes(size=(11, 10)), "large.png", "image/png"),
+        },
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 400
+    with app.app_context():
+        assert Post.query.count() == 0
+
+
+def test_pillow_bomb_error_is_rejected_without_server_error(client, app, monkeypatch):
+    register_and_login(client)
+    image = make_image_bytes()
+
+    def reject_image(*_args, **_kwargs):
+        raise Image.DecompressionBombError("pixel count too large")
+
+    monkeypatch.setattr("app.routes.Image.open", reject_image)
+    response = client.post(
+        "/create_post",
+        data={
+            "title": "Too large",
+            "content": "content goes here",
+            "image": (image, "large.png", "image/png"),
+        },
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 400
+    with app.app_context():
+        assert Post.query.count() == 0
+
+
 def test_file_cleanup_on_replace_and_delete(client, app):
     register_and_login(client)
     first_image = (make_image_bytes(color=(255, 0, 0)), "first.png", "image/png")

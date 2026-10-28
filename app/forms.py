@@ -1,17 +1,11 @@
-from flask import current_app
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
-from PIL import Image, UnidentifiedImageError
 from wtforms import HiddenField, PasswordField, StringField, SubmitField, TextAreaField
 from wtforms import ValidationError
 from wtforms.validators import DataRequired, EqualTo, Length
 
+from .images import inspect_image
 from .models import User
-
-
-def _allowed_formats() -> set[str]:
-    configured = current_app.config.get("ALLOWED_IMAGE_FORMATS") or set()
-    return {fmt.upper() for fmt in configured}
 
 
 def validate_image_file(form, field) -> None:
@@ -19,23 +13,10 @@ def validate_image_file(form, field) -> None:
     if not file or getattr(file, "filename", "") == "":
         field.data = None
         return
-
-    if not (file.mimetype or "").startswith("image/"):
-        raise ValidationError("Разрешена загрузка только изображений.")
-
     try:
-        file.stream.seek(0)
-        image = Image.open(file.stream)
-        image.verify()
-        detected_format = (image.format or "").upper()
-    except (UnidentifiedImageError, OSError) as exc:
-        raise ValidationError("Файл не является допустимым изображением.") from exc
-
-    allowed_formats = _allowed_formats()
-    if detected_format not in allowed_formats:
-        allowed_list = ", ".join(sorted(allowed_formats))
-        raise ValidationError(f"Недопустимый формат. Разрешены: {allowed_list}")
-    file.stream.seek(0)
+        inspect_image(file)
+    except ValueError as exc:
+        raise ValidationError(str(exc)) from exc
 
 
 class RegistrationForm(FlaskForm):

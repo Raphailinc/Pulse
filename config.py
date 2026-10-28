@@ -4,7 +4,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
@@ -20,6 +19,7 @@ class Config:
     POST_UPLOAD_FOLDER = UPLOAD_ROOT / "posts"
 
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH", 5 * 1024 * 1024))
+    MAX_IMAGE_PIXELS = int(os.environ.get("MAX_IMAGE_PIXELS", 16_000_000))
     ALLOWED_IMAGE_FORMATS = {"PNG", "JPEG", "WEBP", "GIF"}
 
 

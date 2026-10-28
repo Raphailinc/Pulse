@@ -15,13 +15,14 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.exceptions import RequestEntityTooLarge
 
 from .forms import CommentForm, LoginForm, PostForm, RegistrationForm, UpdateProfileForm
+from .images import load_image as _validate_image_upload
 from .models import DEFAULT_PROFILE_IMAGE, Comment, Post, User, db
 
 bp = Blueprint("app", __name__)
@@ -41,35 +42,6 @@ def _get_comment_or_404(comment_id: int) -> Comment:
     if not comment:
         abort(404)
     return comment
-
-
-def _allowed_formats() -> set[str]:
-    configured = current_app.config.get("ALLOWED_IMAGE_FORMATS") or set()
-    return {fmt.upper() for fmt in configured}
-
-
-def _validate_image_upload(file_storage) -> tuple[Image.Image, str]:
-    if not file_storage or file_storage.filename == "":
-        raise ValueError("Выберите файл изображения.")
-    if not (file_storage.mimetype or "").startswith("image/"):
-        raise ValueError("Разрешена загрузка только изображений.")
-
-    try:
-        file_storage.stream.seek(0)
-        image = Image.open(file_storage.stream)
-        image.verify()
-        image_format = (image.format or "").upper()
-    except (UnidentifiedImageError, OSError) as exc:
-        raise ValueError("Файл не является допустимым изображением.") from exc
-
-    allowed_formats = _allowed_formats()
-    if image_format not in allowed_formats:
-        raise ValueError(f"Недопустимый формат. Разрешены: {', '.join(sorted(allowed_formats))}")
-
-    file_storage.stream.seek(0)
-    sanitized = Image.open(file_storage.stream)
-    sanitized.load()
-    return sanitized, image_format
 
 
 def _prepare_image_for_save(image: Image.Image, image_format: str) -> Image.Image:
