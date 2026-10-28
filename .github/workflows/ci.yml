@@ -41,5 +41,5 @@ jobs:
         run: pytest
       - name: Audit installed dependencies
         run: |
-          python -m pip install --upgrade pip pip-audit
+          python -m pip install --upgrade pip setuptools pip-audit
           python -m pip_audit --strict
